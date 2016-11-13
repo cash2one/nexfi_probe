@@ -11,6 +11,28 @@
     <link rel="stylesheet" href="/s/ace/assets/css/ace.min.css"/>
     <link rel="stylesheet" href="/s/ace/assets/css/ace-rtl.min.css"/>
     <link rel="stylesheet" href="/s/ace/assets/css/ace-skins.min.css"/>
+    <style>
+        .ui-icon-seek-next, .ui-icon-seek-prev, .ui-icon-seek-end, .ui-icon-seek-first {
+            display: inline-block;
+            font-family: FontAwesome;
+            font-style: normal;
+            font-weight: normal;
+            line-height: 1;
+            -webkit-font-smoothing: antialiased;
+        }
+        .ui-icon-seek-next:before {
+            content: "\f105";
+        }
+        .ui-icon-seek-prev:before {
+            content: "\f104";
+        }
+        .ui-icon-seek-end:before {
+            content: "\f101";
+        }
+        .ui-icon-seek-first:before {
+            content: "\f100";
+        }
+    </style>
     <script src="/s/ace/assets/js/ace-extra.min.js"></script>
 </head>
 
@@ -206,8 +228,8 @@
                 }
             ],
             viewrecords: true,
-            rowNum: 25,
-            rowList: [25, 50, 100],
+            rowNum: 20,
+            rowList: [20, 50, 100],
             pager: pager_selector,
             autowidth: true,
             caption: "探针信息"
@@ -217,7 +239,7 @@
     function add_label(nodeid) {
         bootbox.prompt('请输入备注:', function (label) {
             if (label == "" || label == null) {
-                return bootbox.alert('请输入正确的备注')
+                return
             }
             $.ajax({
                 url: "/v1/clients",
@@ -231,7 +253,6 @@
                     jQuery("#client_table").trigger("reloadGrid");
                 }
             });
-
         });
     }
 </script>
