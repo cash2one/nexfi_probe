@@ -7,6 +7,7 @@ from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from django.views.decorators.http import require_GET
 
 from clients.models import Clients, NodeInfo
 
@@ -39,7 +40,7 @@ def get_client_list(request):
         page = 1
         rows = 10
 
-    all_clients = Clients.objects.order_by('-id').all()
+    all_clients = Clients.get_all_clients()
 
     try:
         p = Paginator(all_clients, rows)
@@ -54,11 +55,7 @@ def get_client_list(request):
     records = []
     for obj in cur_page.object_list:
         node_info = node_info_mapping[obj.nodeid]
-        if node_info:
-            label = node_info.label
-        else:
-            label = ''
-
+        label = node_info.label if node_info else ''
         records.append({
             'id': obj.id,
             'nodeid': obj.nodeid,
@@ -82,7 +79,7 @@ def update_node_info(request):
     if not nodeid:
         return JsonResponse({'success': False, 'error': 'invalid nodeid'})
 
-    nodeinfo, _ = NodeInfo.objects.get_or_create(nodeid=nodeid)
+    nodeinfo, _ = NodeInfo.get_or_create(nodeid)
     if nodeinfo:
         nodeinfo.label = label
         nodeinfo.save()
@@ -96,3 +93,19 @@ def client_list(request):
         return update_node_info(request)
     else:
         return get_client_list(request)
+
+
+@require_GET
+@login_required
+def node_list(request):
+    node_ids = Clients.get_unique_node_ids()
+    node_info_mapping = NodeInfo.get_node_info_mapping(node_ids)
+    result = []
+    for node_id in sorted(node_ids):
+        node_info = node_info_mapping[node_id]
+        label = node_info.label if node_info else ''
+        result.append({
+            'node_id': node_id,
+            'label': label,
+        })
+    return JsonResponse({'node_ids': result})

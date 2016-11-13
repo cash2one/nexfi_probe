@@ -21,6 +21,14 @@ class Clients(models.Model):
         managed = False
         db_table = 'clients'
 
+    @classmethod
+    def get_unique_node_ids(cls):
+        return list(cls.objects.values_list('nodeid', flat=True).annotate().distinct())
+
+    @classmethod
+    def get_all_clients(cls):
+        return cls.objects.order_by('-id').all()
+
 
 class NodeInfo(models.Model):
     nodeid = models.CharField(max_length=128, unique=True)
@@ -34,3 +42,7 @@ class NodeInfo(models.Model):
             result[i.nodeid] = i
 
         return result
+
+    @classmethod
+    def get_or_create(cls, nodeid):
+        return cls.objects.get_or_create(nodeid=nodeid)

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
-    <title>探针信息</title>
+    <title>数据汇总</title>
     <link rel="stylesheet" href="/s/ace/assets/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="/s/ace/assets/css/font-awesome.min.css"/>
     <link rel="stylesheet" href="/s/ace/assets/css/jquery-ui-1.10.3.full.min.css"/>
@@ -20,15 +20,19 @@
             line-height: 1;
             -webkit-font-smoothing: antialiased;
         }
+
         .ui-icon-seek-next:before {
             content: "\f105";
         }
+
         .ui-icon-seek-prev:before {
             content: "\f104";
         }
+
         .ui-icon-seek-end:before {
             content: "\f101";
         }
+
         .ui-icon-seek-first:before {
             content: "\f100";
         }
@@ -105,10 +109,10 @@
                 </div>
             </div><!-- #sidebar-shortcuts -->
             <ul class="nav nav-list" style="overflow:auto;height:1000px;">
-                <li class="active">
+                <li class="">
                     <a href="/home" class=""><span class="menu-text">实时数据</span></a>
                 </li>
-                <li>
+                <li class="active">
                     <a href="/activity" class=""><span class="menu-text">数据汇总</span></a>
                 </li>
             </ul>
@@ -128,14 +132,9 @@
             <div class="page-content">
 
                 <div class="row">
-
                     <div class="col-xs-12">
-                        <div class="col-sm-6" style="width: 100%; float: none; padding-left: 0px;">
-                            <table id="client_table"></table>
-                            <div id="pagination_div"></div>
-                        </div>
+                        {#                        todo: here #}
                     </div>
-
                 </div>
             </div>
         </div>
@@ -153,108 +152,17 @@
 <script src="/s/ace/assets/js/ace.min.js"></script>
 <script src="/s/ace/assets/js/bootbox.min.js"></script>
 <script>
-    function toRefresh() {
-        jQuery("#client_table").trigger("reloadGrid");
-    }
-
-    jQuery(function ($) {
-        var grid_selector = "#client_table";
-        var pager_selector = "#pagination_div";
-        jQuery(grid_selector).jqGrid({
-            url: "/v1/clients",
-            datatype: "json",
-            height: "auto",
-            shrinkToFit: true,
-            colNames: ['#ID', 'Node_ID', '备注', 'ADDR', 'FROM', 'MODEL', 'RSSI', 'SSID', 'ACTION', 'TIMESTAMP', 'TIME'],
-            colModel: [
-                {
-                    name: 'id',
-                    index: 'id'
-                },
-                {
-                    name: 'nodeid',
-                    index: 'nodeid',
-                    width: 230,
-                    formatter: function (cell_val, options, rowdata) {
-                        if (rowdata.label == '') {
-                            return cell_val;
-                        } else {
-                            return rowdata.label + ' (' + cell_val + ')';
-                        }
-                    }
-                },
-                {
-                    name: 'label',
-                    index: 'label',
-                    formatter: function (cell_val, options, rowdata) {
-                        if (cell_val == '') {
-                            return '<button class="btn btn-xs btn-primary" onclick=add_label(\'' + rowdata.nodeid + '\');>添加备注</button>'
-                        } else {
-                            return '<button class="btn btn-xs btn-success" onclick=add_label(\'' + rowdata.nodeid + '\');>编辑备注</button>'
-                        }
-                    }
-                },
-                {
-                    name: 'addr',
-                    index: 'addr'
-                },
-                {
-                    name: 'from_field',
-                    index: 'from_field'
-                },
-                {
-                    name: 'model',
-                    index: 'model'
-                },
-                {
-                    name: 'rssi',
-                    index: 'rssi'
-                },
-                {
-                    name: 'ssid',
-                    index: 'ssid'
-                },
-                {
-                    name: 'action',
-                    index: 'action'
-                },
-                {
-                    name: 'timestamp',
-                    index: 'timestamp'
-                },
-                {
-                    name: 'time',
-                    index: 'time'
-                }
-            ],
-            viewrecords: true,
-            rowNum: 20,
-            rowList: [20, 50, 100],
-            pager: pager_selector,
-            autowidth: true,
-            caption: "探针信息"
-        });
-        jQuery("#client_table").jqGrid('sortableRows');
+    // 最近一日  24 小时
+    // 最近一周  7 天
+    // 最近一月  30 天
+    // 最近一年  12 月
+    $.ajax({
+        url: "/v1/nodes",
+        type: 'GET',
+        success: function (response) {
+            console.log(response);
+        }
     });
-    function add_label(nodeid) {
-        bootbox.prompt('请输入备注:', function (label) {
-            if (label == "" || label == null) {
-                return
-            }
-            $.ajax({
-                url: "/v1/clients",
-                type: 'POST',
-                data: {
-                    label: label,
-                    nodeid: nodeid,
-                    csrfmiddlewaretoken: '{{ csrf_token }}'
-                },
-                success: function (response) {
-                    jQuery("#client_table").trigger("reloadGrid");
-                }
-            });
-        });
-    }
 </script>
 </body>
 </html>
