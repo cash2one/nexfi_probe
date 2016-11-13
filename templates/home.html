@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>探针信息</title>
+    <link rel="stylesheet" href="/s/ace/assets/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/s/ace/assets/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="/s/ace/assets/css/jquery-ui-1.10.3.full.min.css"/>
+    <link rel="stylesheet" href="/s/ace/assets/css/datepicker.css"/>
+    <link rel="stylesheet" href="/s/ace/assets/css/ui.jqgrid.css"/>
+    <link rel="stylesheet" href="/s/ace/assets/css/ace.min.css"/>
+    <link rel="stylesheet" href="/s/ace/assets/css/ace-rtl.min.css"/>
+    <link rel="stylesheet" href="/s/ace/assets/css/ace-skins.min.css"/>
+    <script src="/s/ace/assets/js/ace-extra.min.js"></script>
+</head>
+
+<body>
+<div class="navbar navbar-default" id="navbar">
+    <script type="text/javascript">
+        try {
+            ace.settings.check('navbar', 'fixed')
+        } catch (e) {
+        }
+    </script>
+    <div class="navbar-container" id="navbar-container">
+        <div class="navbar-header pull-left">
+            <a href="#" class="navbar-brand">
+                <small>
+                    智能WIFI探针管理系统
+                </small>
+            </a>
+        </div>
+
+        <div class="navbar-header pull-right" role="navigation">
+            <ul class="nav ace-nav">
+                <li class="light-blue">
+                    <a data-toggle="dropdown" href="#" class="dropdown-toggle" style="width: 150px;">
+								<span class="user-info" style="margin-top: 8px;">
+									<small>{{ user.username }}</small>
+								</span>
+                        <i class="icon-caret-down"></i>
+                    </a>
+                    <ul class="user-menu pull-right dropdown-menu dropdown-yellow dropdown-caret dropdown-close">
+                        <li>
+                            <a href="/logout">
+                                <i class="icon-off"></i>退出系统
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="main-container" id="main-container">
+    <script type="text/javascript">
+        try {
+            ace.settings.check('main-container', 'fixed')
+        } catch (e) {
+        }
+    </script>
+
+    <div class="main-container-inner">
+        <a class="menu-toggler" id="menu-toggler" href="#">
+            <span class="menu-text"></span>
+        </a>
+
+        <div class="sidebar" id="sidebar">
+            <script type="text/javascript">
+                try {
+                    ace.settings.check('sidebar', 'fixed')
+                } catch (e) {
+                }
+            </script>
+
+            <div class="sidebar-shortcuts" id="sidebar-shortcuts">
+                <div class="sidebar-shortcuts-mini" id="sidebar-shortcuts-mini">
+                    <span class="btn btn-success"></span>
+                    <span class="btn btn-info"></span>
+                    <span class="btn btn-warning"></span>
+                    <span class="btn btn-danger"></span>
+                </div>
+            </div><!-- #sidebar-shortcuts -->
+            <ul class="nav nav-list" style="overflow:auto;height:1000px;">
+                <li class="active">
+                    <a href="/home" class=""><span class="menu-text">实时数据</span></a>
+                </li>
+                <li>
+                    <a href="/group" class=""><span class="menu-text">汇总数据</span></a>
+                </li>
+            </ul>
+
+            <div class="sidebar-collapse" id="sidebar-collapse">
+                <i class="icon-double-angle-left" data-icon1="icon-double-angle-left"
+                   data-icon2="icon-double-angle-right"></i>
+            </div>
+            <script type="text/javascript">
+                try {
+                    ace.settings.check('sidebar', 'collapsed')
+                } catch (e) {
+                }
+            </script>
+        </div>
+        <div class="main-content">
+            <div class="page-content">
+
+                <div class="row">
+
+                    <div class="col-xs-12">
+                        <div class="col-sm-6" style="width: 100%; float: none; padding-left: 0px;">
+                            <table id="client_table"></table>
+                            <div id="pagination_div"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- basic scripts -->
+<script src="/s/ace/assets/js/jquery-2.0.3.min.js"></script>
+<script src="/s/ace/assets/js/bootstrap.min.js"></script>
+<script src="/s/ace/assets/js/typeahead-bs2.min.js"></script>
+<script src="/s/ace/assets/js/date-time/bootstrap-datepicker.min.js"></script>
+<script src="/s/ace/assets/js/jqGrid/jquery.jqGrid.min.js"></script>
+<script src="/s/ace/assets/js/jqGrid/i18n/grid.locale-en.js"></script>
+<script src="/s/ace/assets/js/ace-elements.min.js"></script>
+<script src="/s/ace/assets/js/ace.min.js"></script>
+<script>
+    function toRefresh() {
+        jQuery("#client_table").trigger("reloadGrid");
+    }
+
+    jQuery(function ($) {
+        var grid_selector = "#client_table";
+        var pager_selector = "#pagination_div";
+        jQuery(grid_selector).jqGrid({
+            url: "/v1/clients",
+            datatype: "json",
+            height: "auto",
+            shrinkToFit: true,
+            colNames: ['#ID', '备注', 'Node_ID', 'ADDR', 'FROM', 'MODEL', 'RSSI', 'SSID', 'ACTION', 'TIMESTAMP', 'TIME'],
+            colModel: [
+                {
+                    name: 'id',
+                    index: 'id'
+                },
+                {
+                    name: 'label',
+                    index: 'label'
+                },
+                {
+                    name: 'nodeid',
+                    index: 'nodeid'
+                },
+                {
+                    name: 'addr',
+                    index: 'addr'
+                },
+                {
+                    name: 'from_field',
+                    index: 'from_field'
+                },
+                {
+                    name: 'model',
+                    index: 'model'
+                },
+                {
+                    name: 'rssi',
+                    index: 'rssi'
+                },
+                {
+                    name: 'ssid',
+                    index: 'ssid'
+                },
+                {
+                    name: 'action',
+                    index: 'action'
+                },
+                {
+                    name: 'timestamp',
+                    index: 'timestamp'
+                },
+                {
+                    name: 'time',
+                    index: 'time'
+                }
+            ],
+            viewrecords: true,
+            rowNum: 25,
+            rowList: [25, 50, 100],
+            pager: pager_selector,
+            autowidth: true,
+            caption: "探针信息"
+        });
+        jQuery("#client_table").jqGrid('sortableRows');
+    });
+</script>
+</body>
+</html>
