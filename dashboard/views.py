@@ -30,11 +30,7 @@ def do_logout(request):
     return redirect(reverse('login'))
 
 
-@login_required
-def client_list(request):
-    if request.method == 'POST':
-        return JsonResponse({'error': 'method not allowed'})
-
+def get_client_list(request):
     try:
         page = int(request.GET.get('page', 1))
         rows = int(request.GET.get('rows', 10))
@@ -78,3 +74,25 @@ def client_list(request):
         })
 
     return JsonResponse({'records': p.count, 'rows': records, 'page': page, 'total': p.num_pages})
+
+
+def update_node_info(request):
+    nodeid = request.POST.get('nodeid', '')
+    label = request.POST.get('label', '').strip()
+    if not nodeid:
+        return JsonResponse({'success': False, 'error': 'invalid nodeid'})
+
+    nodeinfo, _ = NodeInfo.objects.get_or_create(nodeid=nodeid)
+    if nodeinfo:
+        nodeinfo.label = label
+        nodeinfo.save()
+
+    return JsonResponse({'success': True})
+
+
+@login_required
+def client_list(request):
+    if request.method == 'POST':
+        return update_node_info(request)
+    else:
+        return get_client_list(request)

@@ -129,6 +129,7 @@
 <script src="/s/ace/assets/js/jqGrid/i18n/grid.locale-en.js"></script>
 <script src="/s/ace/assets/js/ace-elements.min.js"></script>
 <script src="/s/ace/assets/js/ace.min.js"></script>
+<script src="/s/ace/assets/js/bootbox.min.js"></script>
 <script>
     function toRefresh() {
         jQuery("#client_table").trigger("reloadGrid");
@@ -142,19 +143,34 @@
             datatype: "json",
             height: "auto",
             shrinkToFit: true,
-            colNames: ['#ID', '备注', 'Node_ID', 'ADDR', 'FROM', 'MODEL', 'RSSI', 'SSID', 'ACTION', 'TIMESTAMP', 'TIME'],
+            colNames: ['#ID', 'Node_ID', '备注', 'ADDR', 'FROM', 'MODEL', 'RSSI', 'SSID', 'ACTION', 'TIMESTAMP', 'TIME'],
             colModel: [
                 {
                     name: 'id',
                     index: 'id'
                 },
                 {
-                    name: 'label',
-                    index: 'label'
+                    name: 'nodeid',
+                    index: 'nodeid',
+                    width: 230,
+                    formatter: function (cell_val, options, rowdata) {
+                        if (rowdata.label == '') {
+                            return cell_val;
+                        } else {
+                            return rowdata.label + ' (' + cell_val + ')';
+                        }
+                    }
                 },
                 {
-                    name: 'nodeid',
-                    index: 'nodeid'
+                    name: 'label',
+                    index: 'label',
+                    formatter: function (cell_val, options, rowdata) {
+                        if (cell_val == '') {
+                            return '<button class="btn btn-xs btn-primary" onclick=add_label(\'' + rowdata.nodeid + '\');>添加备注</button>'
+                        } else {
+                            return '<button class="btn btn-xs btn-success" onclick=add_label(\'' + rowdata.nodeid + '\');>编辑备注</button>'
+                        }
+                    }
                 },
                 {
                     name: 'addr',
@@ -198,6 +214,26 @@
         });
         jQuery("#client_table").jqGrid('sortableRows');
     });
+    function add_label(nodeid) {
+        bootbox.prompt('请输入备注:', function (label) {
+            if (label == "" || label == null) {
+                return bootbox.alert('请输入正确的备注')
+            }
+            $.ajax({
+                url: "/v1/clients",
+                type: 'POST',
+                data: {
+                    label: label,
+                    nodeid: nodeid,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    jQuery("#client_table").trigger("reloadGrid");
+                }
+            });
+
+        });
+    }
 </script>
 </body>
 </html>
