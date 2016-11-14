@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="/s/ace/assets/css/ace.min.css"/>
     <link rel="stylesheet" href="/s/ace/assets/css/ace-rtl.min.css"/>
     <link rel="stylesheet" href="/s/ace/assets/css/ace-skins.min.css"/>
+    <link rel="stylesheet" href="/s/css/jquery.datetimepicker.css"/>
     <style>
         .ui-icon-seek-next, .ui-icon-seek-prev, .ui-icon-seek-end, .ui-icon-seek-first {
             display: inline-block;
@@ -127,13 +128,51 @@
         <div class="main-content">
             <div class="page-content">
 
+
                 <div class="row">
+                    <div class="col-xs-12">
+                        <div class="widget-box">
+                            <div class="widget-header" style="background: none repeat scroll 0 0 #307ecc;">
+                                <h4 style="color: #fff;font-size: 15px;">查询</h4>
+
+                            </div>
+                            <div class="widget-body">
+                                <div class="widget-main">
+                                    <label for="node_label">节点名称:&nbsp;</label>
+                                    <select id="node_label" class="ace">
+                                        <option value="">请选择...</option>
+                                    </select>
+                                    &nbsp;&nbsp;&nbsp;
+                                    <label for="nodeid">Node_ID:&nbsp;</label>
+                                    <input class="ace" id="nodeid"/>
+                                    &nbsp;&nbsp;&nbsp;
+
+                                    <label for="start_datetime">日期范围</label>
+                                    <input type="text" name="start_datetime" id="start_datetime" class="ace" value=""/>
+                                    <label for="end_datetime">~</label>
+                                    <input type="text" name="end_datetime" id="end_datetime" class="ace" value=""/>
+
+                                    &nbsp;&nbsp;&nbsp;
+                                    <button class="btn btn-sm btn-primary" onclick="toRefresh()">搜索</button>
+
+                                    &nbsp;&nbsp;&nbsp;
+                                    <span id="auto_reload_true">
+                                        <button class="btn btn-sm btn-success"
+                                                onclick="autoReload(true);">开启自动刷新</button>
+                                    </span>
+                                    <span id="auto_reload_false" style="display: none">
+                                        <button class="btn btn-sm btn-warning"
+                                                onclick="autoReload(false);">关闭自动刷新</button>
+                                        <span class="text text-danger" id="count_down">列表自动刷新中...</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="col-xs-12">
-                        <div class="col-sm-6" style="width: 100%; float: none; padding-left: 0px;">
-                            <table id="client_table"></table>
-                            <div id="pagination_div"></div>
-                        </div>
+                        <table id="client_table"></table>
+                        <div id="pagination_div"></div>
                     </div>
 
                 </div>
@@ -224,7 +263,8 @@
                 },
                 {
                     name: 'time',
-                    index: 'time'
+                    index: 'time',
+                    width: 200
                 }
             ],
             viewrecords: true,
@@ -254,6 +294,30 @@
                 }
             });
         });
+    }
+
+    var countDown = 20;
+    function setTime() {
+        if (countDown == 0) {
+            jQuery("#client_table").trigger("reloadGrid");
+            countDown = 20;
+            setTimeout("setTime()", 1000);
+        } else {
+            countDown --;
+            $("#count_down").html(countDown + " 秒后自动刷新");
+            setTimeout("setTime()", 1000);
+        }
+    }
+    function autoReload(flag) {
+        if (flag) {
+            $('#auto_reload_false').show();
+            $('#auto_reload_true').hide();
+            setTime();
+        } else {
+            $('#auto_reload_false').hide();
+            $('#auto_reload_true').show();
+            window.location.reload();
+        }
     }
 </script>
 </body>
