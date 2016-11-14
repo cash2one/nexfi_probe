@@ -301,10 +301,10 @@
         if (countDown == 0) {
             jQuery("#client_table").trigger("reloadGrid");
             countDown = 20;
-            setTimeout("setTime()", 1000);
+            setTime()
         } else {
-            countDown --;
             $("#count_down").html(countDown + " 秒后自动刷新");
+            countDown --;
             setTimeout("setTime()", 1000);
         }
     }
