@@ -101,11 +101,17 @@ def node_list(request):
     node_ids = Clients.get_unique_node_ids()
     node_info_mapping = NodeInfo.get_node_info_mapping(node_ids)
     result = []
-    for node_id in sorted(node_ids):
+    for node_id in node_ids:
         node_info = node_info_mapping[node_id]
         label = node_info.label if node_info else ''
-        result.append({
-            'node_id': node_id,
-            'label': label,
-        })
+        if label:
+            result.insert(0, {
+                'node_id': node_id,
+                'label': label,
+            })
+        else:
+            result.append({
+                'node_id': node_id,
+                'label': label,
+            })
     return JsonResponse({'node_ids': result})

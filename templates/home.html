@@ -319,6 +319,25 @@
             window.location.reload();
         }
     }
+    function load_node_label() {
+        $.ajax({
+            url: "/v1/nodes",
+            type: 'GET',
+            success: function (response) {
+                for (var i = 0; i < response.node_ids.length; i++) {
+                    var node_info = response.node_ids[i];
+                    var label = node_info.label;
+                    if (label == "") {
+                        label = node_info.node_id;
+                    } else {
+                        label += ' (' + node_info.node_id + ')';
+                    }
+                    $('#node_label').append('<option value="' + node_info.node_id + '">' + label + '</optoin>')
+                }
+            }
+        });
+    }
+    load_node_label();
 </script>
 </body>
 </html>
