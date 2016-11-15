@@ -143,18 +143,12 @@
                                         <option value="">请选择...</option>
                                     </select>
                                     &nbsp;&nbsp;&nbsp;
-                                    <label for="nodeid">Node_ID:&nbsp;</label>
-                                    <input class="ace" id="nodeid"/>
-                                    &nbsp;&nbsp;&nbsp;
-
                                     <label for="start_datetime">日期范围</label>
                                     <input type="text" name="start_datetime" id="start_datetime" class="ace" value=""/>
                                     <label for="end_datetime">~</label>
                                     <input type="text" name="end_datetime" id="end_datetime" class="ace" value=""/>
-
                                     &nbsp;&nbsp;&nbsp;
                                     <button class="btn btn-sm btn-primary" onclick="toRefresh()">搜索</button>
-
                                     &nbsp;&nbsp;&nbsp;
                                     <span id="auto_reload_true">
                                         <button class="btn btn-sm btn-success"
@@ -225,6 +219,7 @@
                 {
                     name: 'label',
                     index: 'label',
+                    width: 80,
                     formatter: function (cell_val, options, rowdata) {
                         if (cell_val == '') {
                             return '<button class="btn btn-xs btn-primary" onclick=add_label(\'' + rowdata.nodeid + '\');>添加备注</button>'
