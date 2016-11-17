@@ -6,11 +6,11 @@
     <link rel="stylesheet" href="/s/ace/assets/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="/s/ace/assets/css/font-awesome.min.css"/>
     <link rel="stylesheet" href="/s/ace/assets/css/jquery-ui-1.10.3.full.min.css"/>
-    <link rel="stylesheet" href="/s/ace/assets/css/datepicker.css"/>
     <link rel="stylesheet" href="/s/ace/assets/css/ui.jqgrid.css"/>
     <link rel="stylesheet" href="/s/ace/assets/css/ace.min.css"/>
     <link rel="stylesheet" href="/s/ace/assets/css/ace-rtl.min.css"/>
     <link rel="stylesheet" href="/s/ace/assets/css/ace-skins.min.css"/>
+    <link rel="stylesheet" href="/s/css/jquery.datetimepicker.css"/>
     <style>
         .ui-icon-seek-next, .ui-icon-seek-prev, .ui-icon-seek-end, .ui-icon-seek-first {
             display: inline-block;
@@ -133,7 +133,39 @@
 
                 <div class="row">
                     <div class="col-xs-12">
-                        {#                        todo: here #}
+                        <div class="widget-box">
+                            <div class="widget-header" style="background: none repeat scroll 0 0 #307ecc;">
+                                <h4 style="color: #fff;font-size: 15px;">查询</h4>
+
+                            </div>
+                            <div class="widget-body">
+                                <div class="widget-main">
+                                    <label for="report_type">呈现方式:&nbsp;</label>
+                                    <select id="report_type" class="ace">
+                                        <option value="daily" selected>日报表（每小时）</option>
+                                        <option value="monthly">按日汇总报表</option>
+                                    </select>
+
+                                    &nbsp;&nbsp;&nbsp;
+                                    <label for="date">选择日期:&nbsp;</label>
+                                    <input type="text" name="date" id="date"
+                                           class="ace form_datetime" value=""/>
+
+                                    &nbsp;&nbsp;&nbsp;
+                                    <span id="span_days" style="display: none">
+                                        <label for="days">回溯天数:&nbsp;</label>
+                                        <input type="text" name="days" id="days" class="ace" value=""/>
+                                    </span>
+
+                                    &nbsp;&nbsp;&nbsp;
+                                    <button class="btn btn-sm btn-primary" onclick="toRefresh()">查看</button>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="container" style="min-width: 310px; height: 600px; margin: 0 auto"></div>
+
                     </div>
                 </div>
             </div>
@@ -145,24 +177,80 @@
 <script src="/s/ace/assets/js/jquery-2.0.3.min.js"></script>
 <script src="/s/ace/assets/js/bootstrap.min.js"></script>
 <script src="/s/ace/assets/js/typeahead-bs2.min.js"></script>
-<script src="/s/ace/assets/js/date-time/bootstrap-datepicker.min.js"></script>
 <script src="/s/ace/assets/js/jqGrid/jquery.jqGrid.min.js"></script>
-<script src="/s/ace/assets/js/jqGrid/i18n/grid.locale-en.js"></script>
+<script src="/s/ace/assets/js/jqGrid/i18n/grid.locale-cn.js"></script>
 <script src="/s/ace/assets/js/ace-elements.min.js"></script>
 <script src="/s/ace/assets/js/ace.min.js"></script>
 <script src="/s/ace/assets/js/bootbox.min.js"></script>
+<script src="/s/js/jquery.datetimepicker.full.min.js"></script>
+<script src="/s/ace/assets/highcharts/highcharts.js"></script>
+<script src="/s/ace/assets/highcharts/modules/data.js"></script>
+<script src="/s/ace/assets/highcharts/modules/exporting.js"></script>
 <script>
-    // 最近一日  24 小时
-    // 最近一周  7 天
-    // 最近一月  30 天
-    // 最近一年  12 月
-    $.ajax({
-        url: "/v1/nodes",
-        type: 'GET',
-        success: function (response) {
-            console.log(response);
-        }
+    $(document).ready(function () {
+        $.datetimepicker.setLocale('zh');
+        $(".form_datetime").datetimepicker({
+            format: "Y-m-d",
+            timepicker: false
+        });
+        $("#report_type").on("change", function () {
+            var report_type = $(this).val();
+            if (report_type == 'monthly') {
+                $('#span_days').show();
+            } else if (report_type == 'daily') {
+                $('#span_days').hide();
+                $('#days').val('');
+            }
+        });
+
+        $.ajax({
+            url: "/v1/node_activity",
+            type: 'GET',
+            success: function (response) {
+                console.log(response);
+                draw_graph();
+            }
+        });
+
+        draw_graph();
     });
+
+    function draw_graph() {
+        // - [ ] 选择某一个日期, 显示当日的数据 24刻度
+        // - [ ] 选择某一个日期, 填写回溯的天数 最大30天, n天的刻度
+        // - [ ] 汇总数据 汇总显示这个时间段内
+        var chart = new Highcharts.Chart({
+            chart: {
+                renderTo: 'container',
+                defaultSeriesType: 'column'
+            },
+            title: {
+                text: '节点：xxx'
+            },
+            subtitle: {
+                text: '合计数据量：1123'
+            },
+            yAxis: {
+                title: {text: ''},
+                min: 0
+            },
+            xAxis: {
+                categories: []
+            },
+            exporting: {
+                enabled: false
+            },
+            series: [{
+                name: '数据量',
+                dataLabels: {
+                    enabled: true
+                }
+            }]
+        });
+        chart.series[0].setData([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]);
+{#        chart.xAxis[0].setCategories(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']);#}
+    }
+
 </script>
 </body>
 </html>
