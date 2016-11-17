@@ -132,3 +132,30 @@ def node_list(request):
                 'label': label,
             })
     return JsonResponse({'node_ids': result})
+
+
+@require_GET
+@login_required
+def node_activity(request):
+    report_type = request.GET.get('report_type', 'daily')
+    date = request.GET.get('date', '')
+    days = request.GET.get('days', '')
+    node_ids = Clients.get_unique_node_ids()
+    node_info_mapping = NodeInfo.get_node_info_mapping(node_ids)
+    # 通过 date 计算时间戳开始结束
+    # 通过时间戳限制 count(*) group_by node_ids
+
+    result = []
+    for node_id in node_ids:
+        node_info = node_info_mapping[node_id]
+        label = node_info.label if node_info else ''
+
+    example = [
+        {
+            'node_id': '',
+            'label': '',
+            'total_count': 0,
+            'series': [],
+            'xAxis': []
+        }
+    ]

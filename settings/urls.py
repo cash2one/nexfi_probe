@@ -16,6 +16,7 @@ urlpatterns = \
 
         url(r'^v1/clients$', dashboard.views.client_list),
         url(r'^v1/nodes', dashboard.views.node_list),
+        url(r'^v1/node_activity', dashboard.views.node_activity),
 
         url(r'^admin/', admin.site.urls)
     ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
