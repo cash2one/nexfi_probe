@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging as log
+from datetime import datetime
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -10,6 +11,18 @@ from django.urls import reverse
 from django.views.decorators.http import require_GET
 
 from clients.models import Clients, NodeInfo
+
+
+def _parse_str_datetime(str_datetime, format="%Y-%m-%d %H:%M:%S"):
+    # type: (str, str) -> int
+    if not str_datetime:
+        return 0
+    try:
+        return int(datetime.strptime(str_datetime, format).strftime('%s'))
+    except Exception as e:
+        log.error('invalid datetime: %s' % e)
+
+    return 0
 
 
 def do_login(request):
@@ -40,7 +53,11 @@ def get_client_list(request):
         page = 1
         rows = 10
 
-    all_clients = Clients.get_all_clients()
+    node_id = request.GET.get('node_id', '')
+    start_datetime = _parse_str_datetime(request.GET.get('start_datetime', ''))
+    end_datetime = _parse_str_datetime(request.GET.get('end_datetime', ''))
+
+    all_clients = Clients.get_all_clients(node_id=node_id, start_datetime=start_datetime, end_datetime=end_datetime)
 
     try:
         p = Paginator(all_clients, rows)

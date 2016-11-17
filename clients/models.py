@@ -26,8 +26,15 @@ class Clients(models.Model):
         return list(cls.objects.values_list('nodeid', flat=True).annotate().distinct())
 
     @classmethod
-    def get_all_clients(cls):
-        return cls.objects.order_by('-id').all()
+    def get_all_clients(cls, node_id=None, start_datetime=None, end_datetime=None):
+        query = cls.objects
+        if node_id:
+            query = query.filter(nodeid=node_id)
+
+        if start_datetime and end_datetime:
+            query = query.filter(timestamp__gte=start_datetime, timestamp__lt=end_datetime)
+
+        return query.order_by('-id').all()
 
 
 class NodeInfo(models.Model):
