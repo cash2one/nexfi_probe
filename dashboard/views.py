@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging as log
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -139,23 +139,40 @@ def node_list(request):
 def node_activity(request):
     report_type = request.GET.get('report_type', 'daily')
     date = request.GET.get('date', '')
-    days = request.GET.get('days', '')
+    days = int(request.GET.get('days', 1))
     node_ids = Clients.get_unique_node_ids()
     node_info_mapping = NodeInfo.get_node_info_mapping(node_ids)
-    # 通过 date 计算时间戳开始结束
+    try:
+        date = datetime.strptime(date, '%Y-%m-%d').date()
+    except Exception as e:
+        log.error('invalid date: %s' % e)
+        return JsonResponse({'error': 'invalid date'})
+
     # 通过时间戳限制 count(*) group_by node_ids
+    if report_type == 'daily':
+        series_dict, total_count_dict = Clients.get_client_daily_activities(node_ids, date)
+        x_axis = ['{}:00'.format(i) for i in range(24)]
+    else:
+        # monthly
+        if not days:
+            return JsonResponse({'error': 'invalid days'})
+
+        series_dict, total_count_dict = Clients.get_client_all_day_activities(node_ids, date, back_days=days)
+        x_axis = []
+        for i in range(days):
+            x_axis.insert(0, str(date))
+            date -= timedelta(days=1)
 
     result = []
     for node_id in node_ids:
         node_info = node_info_mapping[node_id]
         label = node_info.label if node_info else ''
+        result.append({
+            'node_id': node_id,
+            'label': label,
+            'total_count': total_count_dict[node_id],
+            'series': series_dict[node_id],
+            'xAxis': x_axis
+        })
 
-    example = [
-        {
-            'node_id': '',
-            'label': '',
-            'total_count': 0,
-            'series': [],
-            'xAxis': []
-        }
-    ]
+    return JsonResponse({'data': result})

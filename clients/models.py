@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import datetime
 from collections import defaultdict
 
 from django.db import models
+from django.db.models import Count
+
+from clients import utils
 
 
 class Clients(models.Model):
@@ -35,6 +39,62 @@ class Clients(models.Model):
             query = query.filter(timestamp__gte=start_datetime, timestamp__lt=end_datetime)
 
         return query.order_by('-id').all()
+
+    @classmethod
+    def get_client_daily_activities(cls, node_ids, date):
+        start_ts, end_ts = utils.get_start_end_ts_by_date(date)
+        hours = range(24)
+        result = defaultdict(list)
+        count = defaultdict(int)
+        for node_id in node_ids:
+            dt = cls.objects.filter(
+                timestamp__gte=start_ts,
+                timestamp__lt=end_ts,
+                nodeid=node_id,
+            ).extra(
+                select={'hr': 'hour(time)'}
+            ).values('hr').annotate(n_count=Count('nodeid'))
+            for d in hours:
+                for item in dt:
+                    if item['hr'] == d:
+                        result[node_id].append(item['n_count'])
+                        count[node_id] += item['n_count']
+                        break
+                else:
+                    result[node_id].append(0)
+
+        return result, count
+
+    @classmethod
+    def get_client_all_day_activities(cls, node_ids, date, back_days=30):
+        start_ts, end_ts = utils.get_start_end_ts_by_date(date, back_days=back_days)
+        dates = []
+        for i in range(back_days):
+            dates.insert(0, str(date))
+            date -= datetime.timedelta(days=1)
+
+        result = defaultdict(list)
+        count = defaultdict(int)
+        for node_id in node_ids:
+            dt = cls.objects.filter(
+                timestamp__gte=start_ts,
+                timestamp__lt=end_ts,
+                nodeid=node_id,
+            ).extra(
+                select={'day': 'date(time)'}
+            ).values('day').annotate(n_count=Count('nodeid'))
+
+            for d in dates:
+                for item in dt:
+                    if str(item['day']) == d:
+                        result[node_id].append(item['n_count'])
+                        count[node_id] += item['n_count']
+                        break
+                else:
+                    result[node_id].append(0)
+
+        return result, count
+
 
 
 class NodeInfo(models.Model):
