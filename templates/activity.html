@@ -164,8 +164,9 @@
                             </div>
                         </div>
 
-                        <div id="container" style="min-width: 310px; height: 600px; margin: 0 auto"></div>
+                        <div id="graphs">
 
+                        </div>
                     </div>
                 </div>
             </div>
@@ -202,40 +203,60 @@
                 $('#days').val('');
             }
         });
-
-        $.ajax({
-            url: "/v1/node_activity",
-            type: 'GET',
-            success: function (response) {
-                console.log(response);
-                draw_graph();
-            }
-        });
-
-        draw_graph();
     });
 
-    function draw_graph() {
-        // - [ ] 选择某一个日期, 显示当日的数据 24刻度
-        // - [ ] 选择某一个日期, 填写回溯的天数 最大30天, n天的刻度
-        // - [ ] 汇总数据 汇总显示这个时间段内
-        var chart = new Highcharts.Chart({
+    function toRefresh() {
+        var date = $('#date').val();
+        var days = $('#days').val() || 0;
+        var report_type = $('#report_type').val();
+        if (date == '') {
+            return bootbox.alert('请选择日期！');
+        }
+        if (report_type == 'monthly') {
+            if (!days) {
+                return bootbox.alert('请填写回溯天数！');
+            }
+        }
+
+        $.ajax({
+            url: "/v1/node_activity?report_type=" + report_type + "&date=" + date + '&days=' + days,
+            type: 'GET',
+            success: function (response) {
+                for (var i = 0; i < response.data.length; i++) {
+                    var node = response.data[i];
+                    var container_id = 'container_' + i;
+                    $('#graphs').append('<div id="' + container_id + '" style="min-width: 310px; height: 500px; margin: 0 auto"></div><hr>');
+
+                    var label = node.label;
+                    if (label == "") {
+                        label = node.node_id;
+                    } else {
+                        label += ' (' + node.node_id + ')';
+                    }
+                    draw_graph(container_id, label, node.total_count, node.xAxis, node.series);
+                }
+            }
+        });
+    }
+
+    function draw_graph(container_id, title, total_count, xAxis, series) {
+        new Highcharts.Chart({
             chart: {
-                renderTo: 'container',
+                renderTo: container_id,
                 defaultSeriesType: 'column'
             },
             title: {
-                text: '节点：xxx'
+                text: '节点：' + title
             },
             subtitle: {
-                text: '合计数据量：1123'
+                text: '合计数据量：' + total_count
             },
             yAxis: {
                 title: {text: ''},
                 min: 0
             },
             xAxis: {
-                categories: []
+                categories: xAxis
             },
             exporting: {
                 enabled: false
@@ -244,13 +265,11 @@
                 name: '数据量',
                 dataLabels: {
                     enabled: true
-                }
+                },
+                data: series
             }]
         });
-        chart.series[0].setData([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]);
-{#        chart.xAxis[0].setCategories(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']);#}
     }
-
 </script>
 </body>
 </html>

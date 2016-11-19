@@ -145,7 +145,6 @@ def node_activity(request):
     try:
         date = datetime.strptime(date, '%Y-%m-%d').date()
     except Exception as e:
-        log.error('invalid date: %s' % e)
         return JsonResponse({'error': 'invalid date'})
 
     # 通过时间戳限制 count(*) group_by node_ids
