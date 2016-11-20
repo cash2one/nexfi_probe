@@ -153,12 +153,12 @@
                                     &nbsp;&nbsp;&nbsp;
                                     <span id="auto_reload_true">
                                         <button class="btn btn-sm btn-success"
-                                                onclick="autoReload(true);">开启自动刷新</button>
+                                                onclick="autoReload(true);">开启刷新</button>
                                     </span>
                                     <span id="auto_reload_false" style="display: none">
                                         <button class="btn btn-sm btn-warning"
-                                                onclick="autoReload(false);">关闭自动刷新</button>
-                                        <span class="text text-danger" id="count_down">列表自动刷新中...</span>
+                                                onclick="autoReload(false);">关闭刷新</button>
+                                        <span class="text text-danger" id="count_down">列表刷新中...</span>
                                     </span>
                                 </div>
                             </div>
@@ -316,7 +316,7 @@
             countDown = 20;
             setTime()
         } else {
-            $("#count_down").html(countDown + " 秒后自动刷新");
+            $("#count_down").html(countDown + " 秒后刷新");
             countDown --;
             setTimeout("setTime()", 1000);
         }
