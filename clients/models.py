@@ -98,7 +98,7 @@ class Clients(models.Model):
     @classmethod
     def get_client_monthly_activities(cls, node_ids, year):
         start_ts, end_ts = utils.get_start_end_ts_by_year(year)
-        months = range(12)
+        months = range(1, 13)
         result = defaultdict(list)
         count = defaultdict(int)
         for node_id in node_ids:
