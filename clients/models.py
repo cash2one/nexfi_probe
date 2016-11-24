@@ -95,6 +95,31 @@ class Clients(models.Model):
 
         return result, count
 
+    @classmethod
+    def get_client_monthly_activities(cls, node_ids, year):
+        start_ts, end_ts = utils.get_start_end_ts_by_year(year)
+        months = range(12)
+        result = defaultdict(list)
+        count = defaultdict(int)
+        for node_id in node_ids:
+            dt = cls.objects.filter(
+                timestamp__gte=start_ts,
+                timestamp__lt=end_ts,
+                nodeid=node_id,
+            ).extra(
+                select={'month': 'month(time)'}
+            ).values('month').annotate(n_count=Count('nodeid'))
+
+            for d in months:
+                for item in dt:
+                    if str(item['month']) == str(d):
+                        result[node_id].append(item['n_count'])
+                        count[node_id] += item['n_count']
+                        break
+                else:
+                    result[node_id].append(0)
+
+        return result, count
 
 
 class NodeInfo(models.Model):

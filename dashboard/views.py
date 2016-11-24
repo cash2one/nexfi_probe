@@ -138,24 +138,31 @@ def node_list(request):
 @login_required
 def node_activity(request):
     report_type = request.GET.get('report_type', 'daily')
+    year = request.GET.get('year', 2000)
     date = request.GET.get('date', '')
     end_date = request.GET.get('end_date', 0)
     node_ids = Clients.get_unique_node_ids()
     node_info_mapping = NodeInfo.get_node_info_mapping(node_ids)
     try:
         date = datetime.strptime(date, '%Y-%m-%d').date()
-    except Exception:
-        return JsonResponse({'error': 'invalid date'})
-
+    except:
+        date = 0
     try:
         end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
-    except Exception:
+    except:
         end_date = 0
+    try:
+        year = int(year)
+    except:
+        year = 2000
 
     # 通过时间戳限制 count(*) group_by node_ids
     if report_type == 'daily':
         series_dict, total_count_dict = Clients.get_client_daily_activities(node_ids, date)
         x_axis = ['{}:00'.format(i) for i in range(24)]
+    elif report_type == 'yearly':
+        series_dict, total_count_dict = Clients.get_client_monthly_activities(node_ids, year)
+        x_axis = ['{}月'.format(i) for i in range(1, 13)]
     else:
         # monthly
         if not end_date:

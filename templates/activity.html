@@ -144,17 +144,27 @@
                                     <select id="report_type" class="ace">
                                         <option value="daily" selected>日报表（每小时）</option>
                                         <option value="monthly">按日汇总报表</option>
+                                        <option value="yearly">年度报表</option>
                                     </select>
 
                                     &nbsp;&nbsp;&nbsp;
-                                    <label for="date">选择日期:&nbsp;</label>
-                                    <input type="text" name="date" id="date"
+                                    <span id="span_date">
+                                        <label for="date">选择日期:&nbsp;</label>
+                                        <input type="text" name="date" id="date"
                                            class="ace form_datetime" value=""/>
+                                    </span>
 
                                     &nbsp;&nbsp;&nbsp;
                                     <span id="span_days" style="display: none">
                                         <label for="end_date">结束日期:&nbsp;</label>
                                         <input type="text" name="end_date" id="end_date" class="ace form_datetime" value=""/>
+                                    </span>
+
+                                    &nbsp;&nbsp;&nbsp;
+
+                                    <span id="span_year" style="display: none">
+                                        <label for="year">输入年份:&nbsp;</label>
+                                        <input type="text" name="year" id="year" class="ace" value=""/>
                                     </span>
 
                                     &nbsp;&nbsp;&nbsp;
@@ -197,10 +207,19 @@
         $("#report_type").on("change", function () {
             var report_type = $(this).val();
             if (report_type == 'monthly') {
+                $('#span_year').hide();
+                $('#span_date').show();
                 $('#span_days').show();
             } else if (report_type == 'daily') {
+                $('#span_year').hide();
                 $('#span_days').hide();
                 $('#end_date').val('');
+                $('#span_date').show();
+            } else if (report_type == 'yearly') {
+                $('#span_days').hide();
+                $('#span_date').hide();
+                $('#end_date').val('');
+                $('#span_year').show();
             }
         });
     });
@@ -208,8 +227,9 @@
     function toRefresh() {
         var date = $('#date').val();
         var end_date = $('#end_date').val() || 0;
+        var year = $('#year').val() || 0;
         var report_type = $('#report_type').val();
-        if (date == '') {
+        if (report_type != 'yearly' && date == '') {
             return bootbox.alert('请选择日期！');
         }
         if (report_type == 'monthly') {
@@ -217,11 +237,19 @@
                 return bootbox.alert('请填写结束日期！');
             }
         }
+        if (report_type == 'yearly') {
+            if (!year) {
+                return bootbox.alert('请填写年份！')
+            }
+        }
 
         $.ajax({
-            url: "/v1/node_activity?report_type=" + report_type + "&date=" + date + '&end_date=' + end_date,
+            url: "/v1/node_activity?report_type=" + report_type + "&date=" + date + '&end_date=' + end_date + '&year=' + year,
             type: 'GET',
             success: function (response) {
+                if (response.error) {
+                    return bootbox.alert('数据获取失败！')
+                }
                 for (var i = 0; i < response.data.length; i++) {
                     var node = response.data[i];
                     var container_id = 'container_' + i;
