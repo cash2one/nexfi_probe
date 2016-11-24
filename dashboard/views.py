@@ -139,13 +139,18 @@ def node_list(request):
 def node_activity(request):
     report_type = request.GET.get('report_type', 'daily')
     date = request.GET.get('date', '')
-    days = int(request.GET.get('days', 1))
+    end_date = request.GET.get('end_date', 0)
     node_ids = Clients.get_unique_node_ids()
     node_info_mapping = NodeInfo.get_node_info_mapping(node_ids)
     try:
         date = datetime.strptime(date, '%Y-%m-%d').date()
-    except Exception as e:
+    except Exception:
         return JsonResponse({'error': 'invalid date'})
+
+    try:
+        end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+    except Exception:
+        end_date = 0
 
     # 通过时间戳限制 count(*) group_by node_ids
     if report_type == 'daily':
@@ -153,14 +158,15 @@ def node_activity(request):
         x_axis = ['{}:00'.format(i) for i in range(24)]
     else:
         # monthly
-        if not days:
+        if not end_date:
             return JsonResponse({'error': 'invalid days'})
 
-        series_dict, total_count_dict = Clients.get_client_all_day_activities(node_ids, date, back_days=days)
+        series_dict, total_count_dict = Clients.get_client_all_day_activities(node_ids, date, end_date)
         x_axis = []
-        for i in range(days):
-            x_axis.insert(0, str(date))
-            date -= timedelta(days=1)
+        while date <= end_date:
+            x_axis.append(str(date))
+            # x_axis.insert(0, str(date))
+            date += timedelta(days=1)
 
     result = []
     for node_id in node_ids:

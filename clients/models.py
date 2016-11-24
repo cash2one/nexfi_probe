@@ -66,12 +66,12 @@ class Clients(models.Model):
         return result, count
 
     @classmethod
-    def get_client_all_day_activities(cls, node_ids, date, back_days=30):
-        start_ts, end_ts = utils.get_start_end_ts_by_date(date, back_days=back_days)
+    def get_client_all_day_activities(cls, node_ids, date, end_date):
+        start_ts, end_ts = utils.get_start_end_ts_by_dates(date, end_date)
         dates = []
-        for i in range(back_days):
-            dates.insert(0, str(date))
-            date -= datetime.timedelta(days=1)
+        while date <= end_date:
+            dates.append(str(date))
+            date += datetime.timedelta(days=1)
 
         result = defaultdict(list)
         count = defaultdict(int)

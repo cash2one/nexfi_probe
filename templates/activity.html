@@ -153,8 +153,8 @@
 
                                     &nbsp;&nbsp;&nbsp;
                                     <span id="span_days" style="display: none">
-                                        <label for="days">回溯天数:&nbsp;</label>
-                                        <input type="text" name="days" id="days" class="ace" value=""/>
+                                        <label for="end_date">结束日期:&nbsp;</label>
+                                        <input type="text" name="end_date" id="end_date" class="ace form_datetime" value=""/>
                                     </span>
 
                                     &nbsp;&nbsp;&nbsp;
@@ -200,26 +200,26 @@
                 $('#span_days').show();
             } else if (report_type == 'daily') {
                 $('#span_days').hide();
-                $('#days').val('');
+                $('#end_date').val('');
             }
         });
     });
 
     function toRefresh() {
         var date = $('#date').val();
-        var days = $('#days').val() || 0;
+        var end_date = $('#end_date').val() || 0;
         var report_type = $('#report_type').val();
         if (date == '') {
             return bootbox.alert('请选择日期！');
         }
         if (report_type == 'monthly') {
-            if (!days) {
-                return bootbox.alert('请填写回溯天数！');
+            if (!end_date) {
+                return bootbox.alert('请填写结束日期！');
             }
         }
 
         $.ajax({
-            url: "/v1/node_activity?report_type=" + report_type + "&date=" + date + '&days=' + days,
+            url: "/v1/node_activity?report_type=" + report_type + "&date=" + date + '&end_date=' + end_date,
             type: 'GET',
             success: function (response) {
                 for (var i = 0; i < response.data.length; i++) {
